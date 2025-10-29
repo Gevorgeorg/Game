@@ -1,0 +1,59 @@
+
+services:
+
+  api:
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+
+    ports:
+      - "80:5000"
+
+
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://flask_app:flask_app_password@pg:5432/flask_app
+
+
+    depends_on:
+      - pg
+
+
+    restart: unless-stopped
+
+
+    networks:
+      - app-network
+
+
+  pg:
+
+    image: postgres:15-alpine
+
+
+    environment:
+      POSTGRES_USER: flask_app
+      POSTGRES_PASSWORD: flask_app_password
+      POSTGRES_DB: flask_app
+
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+
+    restart: unless-stopped
+
+
+    networks:
+      - app-network
+
+
+volumes:
+  postgres_data:
+networks:
+  app-network:
+    driver: bridge
+

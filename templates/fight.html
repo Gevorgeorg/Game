@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Sky Wars - Бой</title>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <main style="width: 1024px; margin: 0 auto;">
+      <div class="container">
+        <div class="row align-text-top">
+          <div class="col align-self-start">
+            <h2>{{ heroes.player.name }}<br>класс: <em>{{ heroes.player.unit_class.name }}</em></h2>
+            <p><em>Экипировка:</em></p>
+            <hr>
+            <p>Оружие: {{ heroes.player.weapon.name }}, урон: {{ heroes.player.weapon.min_damage|round(1) }} - {{ heroes.player.weapon.max_damage|round(1) }}<br>
+               Броня: {{ heroes.player.armor.name }}, защита: {{ heroes.player.armor.defence|round(1) }}</p>
+            <hr>
+            <p><em>Информация:</em></p>
+            <hr>
+
+            <p>Очки здоровья: {{ heroes.player.health|round(1) }}/{{ heroes.player.unit_class.max_health|round(1) }}<br>
+               Очки выносливости: {{ heroes.player.stamina|round(1) }}/{{ heroes.player.unit_class.max_stamina|round(1) }}</p>
+          </div>
+
+
+          <div class="col align-self-center">
+            <button type="button" onclick="window.location.href='/fight/hit/'" class="btn btn-success m-2"> Нанести удар</button><br>
+            <button type="button" onclick="window.location.href='/fight/use-skill/'" class="btn btn-danger m-2"> Использовать умение</button><br>
+            <button type="button" onclick="window.location.href='/fight/pass-turn/'" class="btn btn-warning m-2"> Пропустить ход</button><br>
+            <button type="button" onclick="window.location.href='/fight/end-fight/'" class="btn btn-secondary m-2"> Завершить бой</button>
+          </div>
+
+
+          <div class="col align-self-start">
+            <h2>{{ heroes.enemy.name }}<br>класс: <em>{{ heroes.enemy.unit_class.name }}</em></h2>
+            <p><em>Экипировка:</em></p>
+            <hr>
+            <p>Оружие: {{ heroes.enemy.weapon.name }}, урон: {{ heroes.enemy.weapon.min_damage|round(1) }} - {{ heroes.enemy.weapon.max_damage|round(1) }}<br>
+               Броня: {{ heroes.enemy.armor.name }}, защита: {{ heroes.enemy.armor.defence|round(1) }}</p>
+            <hr>
+            <p><em>Информация:</em></p>
+            <hr>
+
+            <p>Очки здоровья: {{ heroes.enemy.health|round(1) }}/{{ heroes.enemy.unit_class.max_health|round(1) }}<br>
+               Очки выносливости: {{ heroes.enemy.stamina|round(1) }}/{{ heroes.enemy.unit_class.max_stamina|round(1) }}</p>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="container">
+        <hr>
+        <div class="row">
+          <div class="col align-content-center">
+            {% if result %}
+            <div class="alert alert-info">
+
+              <p><em>{{ result|replace('\n', '<br>')|safe }}</em></p>
+            </div>
+            {% endif %}
+
+            {% if battle_result %}
+            <div class="alert alert-warning">
+              <h4>{{ battle_result }}</h4>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <hr>
+      </div>
+    </main>
+  </body>
+</html>
