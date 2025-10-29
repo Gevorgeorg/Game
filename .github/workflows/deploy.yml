@@ -1,96 +1,33 @@
-name: Deploy to Server
+name: Deploy to VM
 
 on:
   push:
     branches: [ main ]
 
-env:
-  DOCKER_IMAGE: leonidsidelnikov41955/pythonproject11
-  SERVER_IP: 158.160.61.221
-  SERVER_USER: deployer
-
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Deploy to VM
+      uses: appleboy/scp-action@v0.1.3
+      with:
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USER }}
+        key: ${{ secrets.VM_SSH_KEY }}
+        source: "."
+        target: "/home/ubuntu/flask-game"
 
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-
-      - name: Build Docker image
-        run: |
-          docker build -t $DOCKER_IMAGE:${{ github.sha }} .
-          docker tag $DOCKER_IMAGE:${{ github.sha }} $DOCKER_IMAGE:latest
-      
-
-      - name: Push Docker image
-        run: |
-          docker push $DOCKER_IMAGE:${{ github.sha }}
-          docker push $DOCKER_IMAGE:latest
-      
-
-      - name: Create configuration files
-        run: |
-      
-          cat > docker-compose.prod.yml << EOF
-          version: '3.8'
-          
-          services:
-            app:
-              image: $DOCKER_IMAGE:latest
-              ports:
-                - "5000:5000"
-              environment:
-                - FLASK_ENV=production
-              restart: unless-stopped
-              volumes:
-                - ./data:/app/data
-          EOF
-          
-          
-          cat > .env << EOF
-          FLASK_ENV=production
-          DATABASE_URL=postgresql://user:pass@db:5432/app
-          EOF
-      
-
-      - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.prod.yml,.env"
-          target: "/home/deployer/app/"
-          strip_components: 1
-
-
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/deployer/app
-            
-           
-            docker-compose -f docker-compose.prod.yml down
-            
-            
-            docker pull $DOCKER_IMAGE:latest
-            
-           
-            docker-compose -f docker-compose.prod.yml up -d
-            
-           
-            docker image prune -f
+    - name: Run on VM
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USER }}
+        key: ${{ secrets.VM_SSH_KEY }}
+        script: |
+          cd /home/ubuntu/flask-game
+          docker-compose down
+          docker-compose up -d --build
